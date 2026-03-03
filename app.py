@@ -12,7 +12,7 @@ st.markdown("""
     <style>
     header, footer {visibility: hidden;}
     .block-container { padding: 0 !important; max-width: 100% !important; }
-    .stApp { background-color: #101f30; }
+    .stApp { background-color: #373C38; }
     
     /* 左側 1/3 容器設定 */
     .side-panel {
