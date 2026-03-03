@@ -7,42 +7,41 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(layout="wide", page_title="Vibe Dashboard")
 st_autorefresh(interval=1000, key="vibe_clock")
 
-# 2. 注入左側 1/3 佈局與大日期 CSS
+# 2. 注入 CSS：修正層級與輸入框位置
 st.markdown("""
     <style>
     header, footer {visibility: hidden;}
     .block-container { padding: 0 !important; max-width: 100% !important; }
     .stApp { background-color: #101f30; }
     
-    /* 左側 1/3 容器設定 */
+    /* 左側 1/3 容器 */
     .side-panel {
         position: fixed;
         top: 0;
         left: 0;
-        width: 33.33vw; /* 佔據左側 1/3 */
+        width: 33.33vw;
         height: 100vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
         padding-left: 5vw;
-        gap: 8vh; /* 調整上下兩塊的間距 */
-        z-index: 100;
+        gap: 5vh;
+        z-index: 10; /* 降低層級確保輸入框可被點擊 */
     }
     
-    /* 單一城市區塊 (半透明底版) */
     .glass-card {
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(15px);
         padding: 40px;
         border-radius: 20px;
-        width: 100%;
+        width: 100%; /* 確保寬度填滿 1/3 內的 padding */
     }
     
-    .city-label { font-size: 24px; color: #888; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 15px; }
+    .city-label { font-size: 24px; color: #888; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; }
     
     .time-display {
         font-family: 'Helvetica Neue', sans-serif;
-        font-size: 85px; /* 時鐘大小 */
+        font-size: 85px;
         font-weight: 450;
         letter-spacing: -3px;
         font-variant-numeric: tabular-nums;
@@ -52,22 +51,28 @@ st.markdown("""
     .time-be { color: #FFFFFF; }
     .time-tp { color: #A9A9A9; }
     
-    /* 放大日期與星期 */
     .date-display {
         font-family: 'Helvetica Neue', sans-serif;
-        font-size: 28px; /* 放大日期 */
+        font-size: 28px;
         font-weight: 300;
         color: rgba(255, 255, 255, 0.6);
     }
-    .weekday-highlight {
-        font-weight: 600;
-        color: #FFFFFF;
-        margin-right: 10px;
-    }
+    .weekday-highlight { font-weight: 600; color: #FFFFFF; margin-right: 10px; }
     
-    /* 輸入框：放在左下方 */
-    .stTextInput { position: fixed; bottom: 40px; left: 50%; width: 25vw; }
-    input { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid #555 !important; }
+    /* 輸入框定位修改：將其移出 side-panel 的覆蓋範圍 */
+    .stTextInput { 
+        position: fixed; 
+        bottom: 40px; 
+        left: 40vw; /* 移到右側 2/3 的起始位置 */
+        width: 30vw; 
+        z-index: 100; /* 確保在最上層 */
+    }
+    input { 
+        background-color: rgba(255,255,255,0.05) !important; 
+        color: white !important; 
+        border: 1px solid #555 !important; 
+        padding: 10px !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -77,7 +82,7 @@ if 'todo' not in st.session_state: st.session_state.todo = ""
 tz_tp, tz_be = pytz.timezone('Asia/Taipei'), pytz.timezone('Europe/Brussels')
 now_tp, now_be = datetime.datetime.now(tz_tp), datetime.datetime.now(tz_be)
 
-# 4. 渲染左側 1/3 佈局
+# 4. 渲染 HTML (確保 div 標籤完全閉合)
 st.markdown(f"""
     <div class="side-panel">
         <div class="glass-card">
