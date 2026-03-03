@@ -12,7 +12,7 @@ st.markdown("""
     <style>
     header, footer {visibility: hidden;}
     .block-container { padding: 0 !important; max-width: 100% !important; }
-    .stApp { background-color: #373C38; }
+    .stApp { background-color: #101f30; }
     
     /* 建立靠左的容器 */
     .side-container {
@@ -31,22 +31,22 @@ st.markdown("""
         padding: 30px;
         border-radius: 15px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        width: 380px;
+        width: 450px;
         text-align: left; /* 文字靠左 */
     }
     
     .time-display {
         font-family: 'Helvetica Neue', sans-serif;
-        font-size: 70px; /* 稍微縮小以適應側邊欄 */
-        font-weight: 600;
+        font-size: 100px; /* 稍微縮小以適應側邊欄 */
+        font-weight: 450;
         letter-spacing: -2px;
         font-variant-numeric: tabular-nums;
         line-height: 1;
     }
     .time-be { color: #FFFFFF; }
     .time-tp { color: #A9A9A9; }
-    .city-label { font-size: 14px; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
-    .date-display { font-size: 16px; color: #666; margin-top: 8px; }
+    .city-label { font-size: 24px; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+    .date-display { font-size: 36px; color: #666; margin-top: 8px; }
     
     /* 輸入框定位 */
     .stTextInput { position: fixed; bottom: 40px; left: 40px; width: 380px; }
@@ -65,12 +65,12 @@ st.markdown(f"""
     <div class="side-container">
         <div class="glass-card">
             <div class="city-label">Brussels</div>
-            <div class="time-display time-be">{now_be.strftime("%H:%M:%S")}</div>
+            <div class="time-display time-be">{now_be.strftime("%H:%M")}</div>
             <div class="date-display">{now_be.strftime("%A, %b %d")}</div>
         </div>
         <div class="glass-card">
             <div class="city-label">Taipei</div>
-            <div class="time-display time-tp">{now_tp.strftime("%H:%M:%S")}</div>
+            <div class="time-display time-tp">{now_tp.strftime("%H:%M")}</div>
             <div class="date-display">{now_tp.strftime("%A, %b %d")}</div>
         </div>
     </div>
