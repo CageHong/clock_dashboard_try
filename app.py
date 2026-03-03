@@ -3,86 +3,78 @@ import datetime
 import pytz
 from streamlit_autorefresh import st_autorefresh
 
-# 1. 強制設定為全寬模式，這是解決「非全螢幕」的關鍵
+# 1. 頁面配置
 st.set_page_config(layout="wide", page_title="Vibe Dashboard")
-
-# 2. 核心心跳
 st_autorefresh(interval=1000, key="vibe_clock")
 
-# 3. 注入 CSS：除了配色與字體，我們還要拔掉邊距 (Padding)
+# 2. 注入靠左、上下排列、半透明底版的 CSS
 st.markdown("""
     <style>
-    /* 拔掉所有預設的邊距與空白 */
     header, footer {visibility: hidden;}
-    .block-container {
-        padding: 0 !important;
-        max-width: 100% !important;
-    }
+    .block-container { padding: 0 !important; max-width: 100% !important; }
+    .stApp { background-color: #373C38; }
     
-    .main-container {
-        background-color: #101f30; /* 你的暗石灰色 */
-        height: 100vh;
-        width: 100vw; /* 確保寬度佔滿 100% 視窗 */
+    /* 建立靠左的容器 */
+    .side-container {
+        position: fixed;
+        top: 50px;
+        left: 40px;
         display: flex;
-        justify-content: center;
-        gap: 200px;
-        align-items: center;
-        color: #FFFFFF;
-        text-align: center;
-        position: fixed; /* 固定位置，防止捲動 */
-        top: 0;
-        left: 0;
+        flex-direction: column; /* 上下排列 */
+        gap: 20px;
     }
     
-    .city-label {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 30px;
-        font-weight: 300;
-        color: #A9A9A9;
-        letter-spacing: 5px;
-        text-transform: uppercase;
-        margin-bottom: 5px;
+    /* 半透明底版樣式 */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05); /* 半透明白 */
+        backdrop-filter: blur(10px); /* 磨砂玻璃效果 */
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        width: 380px;
+        text-align: left; /* 文字靠左 */
     }
     
     .time-display {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 110px;
-        font-weight: 450;
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 70px; /* 稍微縮小以適應側邊欄 */
+        font-weight: 600;
         letter-spacing: -2px;
-        /* 強制數字等寬，防止秒針跳動時字體晃動 */
-        font-variant-numeric: tabular-nums; 
-        margin: 0;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
     }
+    .time-be { color: #FFFFFF; }
+    .time-tp { color: #A9A9A9; }
+    .city-label { font-size: 14px; color: #888; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+    .date-display { font-size: 16px; color: #666; margin-top: 8px; }
     
-    .date-display {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 25px;
-        font-weight: 300;
-        color: #7A7A7A;
-        margin-top: 10px;
-    }
+    /* 輸入框定位 */
+    .stTextInput { position: fixed; bottom: 40px; left: 40px; width: 380px; }
+    input { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid #444 !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 4. 邏輯層
-tz_taipei = pytz.timezone('Asia/Taipei')
-tz_belgium = pytz.timezone('Europe/Brussels')
+# 3. 邏輯層 (時區與記憶)
+if 'todo' not in st.session_state: st.session_state.todo = ""
 
-now_tp = datetime.datetime.now(tz_taipei)
-now_be = datetime.datetime.now(tz_belgium)
+tz_tp, tz_be = pytz.timezone('Asia/Taipei'), pytz.timezone('Europe/Brussels')
+now_tp, now_be = datetime.datetime.now(tz_tp), datetime.datetime.now(tz_be)
 
-# 5. 渲染層
+# 4. 渲染側邊上下排列的時鐘
 st.markdown(f"""
-    <div class="main-container">
-        <div>
-            <div class="city-label">Belgium</div>
-            <div class="time-display">{now_be.strftime("%H:%M:%S")}</div>
-            <div class="date-display">{now_be.strftime("%Y / %m / %d")}</div>
+    <div class="side-container">
+        <div class="glass-card">
+            <div class="city-label">Brussels</div>
+            <div class="time-display time-be">{now_be.strftime("%H:%M:%S")}</div>
+            <div class="date-display">{now_be.strftime("%A, %b %d")}</div>
         </div>
-        <div>
+        <div class="glass-card">
             <div class="city-label">Taipei</div>
-            <div class="time-display">{now_tp.strftime("%H:%M:%S")}</div>
-            <div class="date-display">{now_tp.strftime("%Y / %m / %d")}</div>
+            <div class="time-display time-tp">{now_tp.strftime("%H:%M:%S")}</div>
+            <div class="date-display">{now_tp.strftime("%A, %b %d")}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+# 5. 記憶功能輸入框
+st.session_state.todo = st.text_input("", value=st.session_state.todo, placeholder="Research Notes / TAZ Observations...")
