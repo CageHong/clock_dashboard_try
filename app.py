@@ -7,14 +7,13 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(layout="wide", page_title="Vibe Dashboard")
 st_autorefresh(interval=1000, key="vibe_clock")
 
-# 2. 注入 CSS：修正層級與輸入框位置
+# 2. 注入 CSS
 st.markdown("""
     <style>
     header, footer {visibility: hidden;}
     .block-container { padding: 0 !important; max-width: 100% !important; }
     .stApp { background-color: #101f30; }
     
-    /* 左側 1/3 容器 */
     .side-panel {
         position: fixed;
         top: 0;
@@ -26,7 +25,7 @@ st.markdown("""
         justify-content: center;
         padding-left: 5vw;
         gap: 5vh;
-        z-index: 10; /* 降低層級確保輸入框可被點擊 */
+        z-index: 5;
     }
     
     .glass-card {
@@ -34,7 +33,7 @@ st.markdown("""
         backdrop-filter: blur(15px);
         padding: 40px;
         border-radius: 20px;
-        width: 100%; /* 確保寬度填滿 1/3 內的 padding */
+        width: 85%; /* 稍微縮小寬度，避免擠壓 */
     }
     
     .city-label { font-size: 24px; color: #888; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; }
@@ -49,7 +48,7 @@ st.markdown("""
         margin-bottom: 10px;
     }
     .time-be { color: #FFFFFF; }
-    .time-tp { color: #A9A9A9; }
+    .time-tp { color: #CCCCCC; } /* 調亮台灣時間顏色 */
     
     .date-display {
         font-family: 'Helvetica Neue', sans-serif;
@@ -59,20 +58,16 @@ st.markdown("""
     }
     .weekday-highlight { font-weight: 600; color: #FFFFFF; margin-right: 10px; }
     
-    /* 輸入框定位修改：將其移出 side-panel 的覆蓋範圍 */
+    /* 修正輸入框定位 */
     .stTextInput { 
         position: fixed; 
-        bottom: 40px; 
-        left: 40vw; /* 移到右側 2/3 的起始位置 */
+        bottom: 50px; 
+        left: 50%; 
+        transform: translateX(-50%); /* 確保正中央 */
         width: 30vw; 
-        z-index: 100; /* 確保在最上層 */
+        z-index: 99; 
     }
-    input { 
-        background-color: rgba(255,255,255,0.05) !important; 
-        color: white !important; 
-        border: 1px solid #555 !important; 
-        padding: 10px !important;
-    }
+    input { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid #555 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -82,28 +77,27 @@ if 'todo' not in st.session_state: st.session_state.todo = ""
 tz_tp, tz_be = pytz.timezone('Asia/Taipei'), pytz.timezone('Europe/Brussels')
 now_tp, now_be = datetime.datetime.now(tz_tp), datetime.datetime.now(tz_be)
 
-# 4. 渲染 HTML (確保 div 標籤完全閉合)
-st.markdown(f"""
-    <div class="side-panel">
-        <div class="glass-card">
-            <div class="city-label">Belgium</div>
-            <div class="time-display time-be">{now_be.strftime("%H:%M")}</div>
-            <div class="date-display">
-                <span class="weekday-highlight">{now_be.strftime("%A")}</span>
-                {now_be.strftime("%b %d")}
-            </div>
-        </div>
-        
-        <div class="glass-card">
-            <div class="city-label">Taipei</div>
-            <div class="time-display time-tp">{now_tp.strftime("%H:%M")}</div>
-            <div class="date-display">
-                <span class="weekday-highlight">{now_tp.strftime("%A")}</span>
-                {now_tp.strftime("%b %d")}
-            </div>
+# 4. 渲染 HTML (請確保整段複製，不要漏掉內部的括號)
+st.markdown(f'''
+<div class="side-panel">
+    <div class="glass-card">
+        <div class="city-label">Belgium</div>
+        <div class="time-display time-be">{now_be.strftime("%H:%M")}</div>
+        <div class="date-display">
+            <span class="weekday-highlight">{now_be.strftime("%A")}</span>
+            {now_be.strftime("%b %d")}
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    <div class="glass-card">
+        <div class="city-label">Taipei</div>
+        <div class="time-display time-tp">{now_tp.strftime("%H:%M")}</div>
+        <div class="date-display">
+            <span class="weekday-highlight">{now_tp.strftime("%A")}</span>
+            {now_tp.strftime("%b %d")}
+        </div>
+    </div>
+</div>
+''', unsafe_allow_html=True)
 
 # 5. 記憶功能輸入框
 st.session_state.todo = st.text_input("", value=st.session_state.todo, placeholder="Research Notes...")
