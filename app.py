@@ -66,7 +66,7 @@ st.markdown("""
     }
     
     /* 輸入框：放在左下方 */
-    .stTextInput { position: fixed; bottom: 40px; left: 20vw; width: 25vw; }
+    .stTextInput { position: fixed; bottom: 40px; middle; width: 25vw; }
     input { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid #555 !important; }
     </style>
     """, unsafe_allow_html=True)
