@@ -3,101 +3,38 @@ import datetime
 import pytz
 from streamlit_autorefresh import st_autorefresh
 
-# 1. 頁面配置
-st.set_page_config(layout="wide", page_title="Vibe Dashboard")
+st.set_page_config(layout="wide")
 st_autorefresh(interval=1000, key="vibe_clock")
 
-# 2. 注入 CSS
+# 1. CSS 空間定義
 st.markdown("""
     <style>
     header, footer {visibility: hidden;}
-    .block-container { padding: 0 !important; max-width: 100% !important; }
-    .stApp { background-color: #101f30; }
-    
-    .side-panel {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 33.33vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding-left: 5vw;
-        gap: 5vh;
-        z-index: 5;
+    .stApp { background-color: #101f30; color: white; }
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 25vw);
+        grid-template-rows: repeat(3, 33.33vh);
+        height: 100vh; width: 100vw;
     }
-    
-    .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(15px);
-        padding: 40px;
-        border-radius: 20px;
-        width: 85%; /* 稍微縮小寬度，避免擠壓 */
-    }
-    
-    .city-label { font-size: 24px; color: #888; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 10px; }
-    
-    .time-display {
-        font-family: 'Helvetica Neue', sans-serif;
-        font-size: 85px;
-        font-weight: 450;
-        letter-spacing: -3px;
-        font-variant-numeric: tabular-nums;
-        line-height: 1;
-        margin-bottom: 10px;
-    }
-    .time-be { color: #FFFFFF; }
-    .time-tp { color: #CCCCCC; } /* 調亮台灣時間顏色 */
-    
-    .date-display {
-        font-family: 'Helvetica Neue', sans-serif;
-        font-size: 28px;
-        font-weight: 300;
-        color: rgba(255, 255, 255, 0.6);
-    }
-    .weekday-highlight { font-weight: 600; color: #FFFFFF; margin-right: 10px; }
-    
-    /* 修正輸入框定位 */
-    .stTextInput { 
-        position: fixed; 
-        bottom: 50px; 
-        left: 50%; 
-        transform: translateX(-50%); /* 確保正中央 */
-        width: 30vw; 
-        z-index: 99; 
-    }
-    input { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid #555 !important; }
+    .be-zone { grid-column: 1/3; grid-row: 1/3; background: rgba(255,255,255,0.03); padding-left: 5vw; display: flex; flex-direction: column; justify-content: center; }
+    .tp-zone { grid-column: 3/4; grid-row: 1/2; background: rgba(255,255,255,0.02); padding-left: 3vw; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    .us-zone { grid-column: 4/5; grid-row: 1/2; background: rgba(255,255,255,0.01); padding-left: 3vw; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+    .city-label { font-size: 14px; color: #888; }
+    .be-time { font-size: 110px; font-weight: 600; }
+    .small-time { font-size: 45px; }
+    .status-open { color: #4CAF50; }
+    .status-closed { color: #F44336; }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# 3. 邏輯層 (時區與記憶)
-if 'todo' not in st.session_state: st.session_state.todo = ""
+# 2. 數據準備
+tz_be, tz_tp, tz_us = pytz.timezone('Europe/Brussels'), pytz.timezone('Asia/Taipei'), pytz.timezone('America/New_York')
+now_be, now_tp, now_us = datetime.datetime.now(tz_be), datetime.datetime.now(tz_tp), datetime.datetime.now(tz_us)
 
-tz_tp, tz_be = pytz.timezone('Asia/Taipei'), pytz.timezone('Europe/Brussels')
-now_tp, now_be = datetime.datetime.now(tz_tp), datetime.datetime.now(tz_be)
+# 3. 渲染 (避開所有大括號嵌套衝突)
+be_html = f'<div class="be-zone"><div class="city-label">Brussels</div><div class="be-time">{now_be.strftime("%H:%M:%S")}</div></div>'
+tp_html = f'<div class="tp-zone"><div class="city-label">Taipei</div><div class="small-time">{now_tp.strftime("%H:%M")}</div></div>'
+us_html = f'<div class="us-zone"><div class="city-label">New York</div><div class="small-time">{now_us.strftime("%H:%M")}</div></div>'
 
-# 4. 渲染 HTML (請確保整段複製，不要漏掉內部的括號)
-st.markdown(f'''
-<div class="side-panel">
-    <div class="glass-card">
-        <div class="city-label">Belgium</div>
-        <div class="time-display time-be">{now_be.strftime("%H:%M")}</div>
-        <div class="date-display">
-            <span class="weekday-highlight">{now_be.strftime("%A")}</span>
-            {now_be.strftime("%b %d")}
-        </div>
-    </div>
-    <div class="glass-card">
-        <div class="city-label">Taipei</div>
-        <div class="time-display time-tp">{now_tp.strftime("%H:%M")}</div>
-        <div class="date-display">
-            <span class="weekday-highlight">{now_tp.strftime("%A")}</span>
-            {now_tp.strftime("%b %d")}
-        </div>
-    </div>
-</div>
-''', unsafe_allow_html=True)
-
-# 5. 記憶功能輸入框
-st.session_state.todo = st.text_input("", value=st.session_state.todo, placeholder="Research Notes...")
+st.markdown(f'<div class="dashboard-grid">{be_html}{tp_html}{us_html}</div>', unsafe_allow_html=True)
