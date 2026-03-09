@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # --- 1. 初始化設定 ---
 st.set_page_config(layout="wide", page_title="Vibe Dashboard")
 
-# 10秒刷新一次：平衡效能與即時性
+# 10秒刷新一次：確保效能穩定
 st_autorefresh(interval=10000, key="vibe_clock")
 
 IMAGE_DIR = "vibe_images"
@@ -45,8 +45,7 @@ def check_market_status(exchange_code):
         schedule = calendar.schedule(start_date=now_utc - datetime.timedelta(days=1), 
                                      end_date=now_utc + datetime.timedelta(days=1))
         is_open = calendar.open_at_time(schedule, now_utc)
-        return ("MARKET OPEN", "status-open") if is_open else ("MARKET CLOSED",\
-                                                               "status-closed")
+        return ("MARKET OPEN", "status-open") if is_open else ("MARKET CLOSED", "status-closed")
     except:
         return ("MARKET CLOSED", "status-closed")
 
@@ -66,10 +65,8 @@ with st.sidebar:
             color: #DDD; padding: 12px; border-radius: 10px; 
             cursor: pointer; font-size: 14px; letter-spacing: 1.5px;
             transition: 0.3s; font-family: sans-serif;
-        " onmouseover="this.style.background='rgba(255,255,255,0.15)';\
-            this.style.color='white'" 
-           onmouseout="this.style.background='rgba(255,255,255,0.08)';\
-            this.style.color='#DDD'">
+        " onmouseover="this.style.background='rgba(255,255,255,0.15)'; this.style.color='white'" 
+           onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#DDD'">
             ▶ PRESENT MODE
         </button>
         <script>
@@ -90,11 +87,12 @@ with st.sidebar:
         height=70,
     )
 
-# 時區設定
+# 時區處理
 tz_be, tz_tp, tz_us = pytz.timezone('Europe/Brussels'), \
                       pytz.timezone('Asia/Taipei'), pytz.timezone('America/New_York')
 now_be, now_tp, now_us = datetime.datetime.now(tz_be), \
                          datetime.datetime.now(tz_tp), datetime.datetime.now(tz_us)
+
 # 計算相對於比利時的小時差
 tp_diff = f"{int((now_tp.utcoffset() - now_be.utcoffset()).total_seconds() / 3600):+d}"
 us_diff = f"{int((now_us.utcoffset() - now_be.utcoffset()).total_seconds() / 3600):+d}"
@@ -115,106 +113,118 @@ else:
 tp_stat, tp_class = check_market_status('XTAI')
 us_stat, us_class = check_market_status('NYSE')
 
-# --- 4. CSS 樣式注入 (回歸原始 Grid 比例 + 負邊距置頂) ---
+# --- 4. CSS 樣式注入 ---
 st.markdown(f"""
-    <style>
-    /* 1. 透明化 Header 並隱藏干擾按鈕 */
-    header[data-testid="stHeader"] {{
-        background: transparent !important;
-    }}
-    [data-testid="stAppViewMenu"], [data-testid="stAppDeployButton"] {{
-        display: none !important;
-    }}
-    
-    /* 2. 側邊欄喚回按鈕美化 */
-    [data-testid="stSidebarCollapsedControl"] {{
-        color: white !important;
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 50%;
-        margin-top: 65px; /* 避開內容上移區域 */
-        opacity: 0.3;
-        transition: 0.4s;
-    }}
-    [data-testid="stSidebarCollapsedControl"]:hover {{ opacity: 1; }}
+<style>
+/* 1. 透明化 Header 並隱藏干擾按鈕 */
+header[data-testid="stHeader"] {{
+    background: transparent !important;
+}}
+[data-testid="stAppViewMenu"], [data-testid="stAppDeployButton"] {{
+    display: none !important;
+}}
 
-    /* 3. 核心置頂佈局 (向上平移 60px) */
-    .block-container {{
-        padding: 0rem !important;
-        margin-top: -60px !important; 
-        max-width: 100vw !important;
-        height: 100vh !important;
-    }}
-    
-    footer {{ visibility: hidden; }}
-    .stApp {{
-        {bg_style}
-        color: white;
-        transition: background 1.5s ease-in-out;
-    }}
+/* 2. 側邊欄喚回按鈕美化與亂碼修復 */
+[data-testid="stSidebarCollapsedControl"] {{
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 50%;
+    margin-top: 65px; 
+    opacity: 0.3;
+    transition: 0.4s;
+}}
+[data-testid="stSidebarCollapsedControl"]:hover {{ opacity: 1; }}
 
-    /* 4. 回歸原始 Grid 比例：25vw */
-    .dashboard-grid {{
-        display: grid;
-        grid-template-columns: repeat(6, 25vw);
-        grid-template-rows: repeat(3, 33.33vh);
-        height: 100vh;
-        width: 100vw;
-        margin: 0 !important;
-    }}
-    
-    .be-zone {{ 
-        grid-column: 1/3; grid-row: 1/3;
-        background: rgba(255, 255, 255, 0.03);
-        padding-left: 5vw; display: flex;
-        flex-direction: column; justify-content: center;
-        border-radius: 20px; margin: 15px; 
-    }}
-    .tp-zone, .us-zone {{ 
-        background: rgba(255, 255, 255, 0.02);
-        padding-left: 3vw; display: flex;
-        flex-direction: column; justify-content: center;
-        border-radius: 20px; margin: 15px; overflow: hidden; 
-    }}
-    .tp-zone {{ grid-column: 1/2; grid-row: 3/4; }}
-    .us-zone {{ grid-column: 2/3; grid-row: 3/4; }}
+[data-testid="stSidebarCollapsedControl"] div p {{
+    display: none !important;
+    font-size: 0 !important;
+}}
 
-    .city-label {{font-size: 50px; color: #DDD}}
-    /* 文字樣式完全復刻原版 */
-    .small-city-label {{
-        font-size: 26px;
-        color: #AAA;
-        display: flex;
-        align-items: baseline; /* 讓時差對齊城市名的底部 */
-    }}
+/* 3. 核心置頂佈局 (向上平移 60px) */
+.block-container {{
+    padding: 0rem !important;
+    margin-top: -60px !important; 
+    max-width: 100vw !important;
+    height: 100vh !important;
+}}
 
-    /* 2. 時差文字：純文字、半透明、無背景 */
-    .diff-tag {{
-        font-size: 15px;
-        font-weight: 400;
-        color: rgba(255, 255, 255, 0.4); /* 非常淡的文字顏色 */
-        margin-left: 12px; /* 與城市名的間距 */
-        letter-spacing: 1px;
-    }}
-    .be-time {{ font-size: 120px; font-weight: 500; font-variant-numeric: tabular-nums; }}
-    .ampm {{ font-size: 50px; margin-left: 20px; color: rgba(255, 255, 255, 0.3); }}
-    .be-date {{ font-size: 42px; font-weight: 450; color: #AAA; margin-right: 20px; }}
-    .be-day {{ font-size: 42px; font-weight: 450; color: #BBB; }} 
-    .small-time {{ font-size: 45px; font-variant-numeric: tabular-nums; }}
-    .small-ampm {{ font-size: 30px; margin-left: 5px; color: rgba(255, 255, 255, 0.5); }}
+footer {{ visibility: hidden; }}
+.stApp {{
+    {bg_style}
+    color: white;
+    transition: background 1.5s ease-in-out;
+}}
 
-    .market-status {{ font-size: 14px; font-weight: 600; margin-top: 10px;\
-        letter-spacing: 1px; }}
-    .status-open {{ color: #00AA90 !important; }}
-    .status-closed {{ color: #888 !important; }}
-    </style>
+/* 4. Grid 佈局：25vw */
+.dashboard-grid {{
+    display: grid;
+    grid-template-columns: repeat(6, 25vw);
+    grid-template-rows: repeat(3, 33.33vh);
+    height: 100vh;
+    width: 100vw;
+    margin: 0 !important;
+}}
+
+.be-zone {{ 
+    grid-column: 1/3; grid-row: 1/3;
+    background: rgba(255, 255, 255, 0.03);
+    padding-left: 5vw; display: flex;
+    flex-direction: column; justify-content: center;
+    border-radius: 20px; margin: 15px; 
+}}
+.tp-zone, .us-zone {{ 
+    background: rgba(255, 255, 255, 0.02);
+    padding-left: 3vw; display: flex;
+    flex-direction: column; justify-content: center;
+    border-radius: 20px; margin: 15px; overflow: hidden; 
+}}
+.tp-zone {{ grid-column: 1/2; grid-row: 3/4; }}
+.us-zone {{ grid-column: 2/3; grid-row: 3/4; }}
+
+/* 5. 文字樣式 */
+.city-label {{ font-size: 50px; color: #DDD; }}
+.small-city-label {{
+    font-size: 26px;
+    color: #AAA;
+    display: flex;
+    align-items: baseline;
+}}
+
+.diff-tag {{
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.25);
+    margin-left: 12px;
+    letter-spacing: 1px;
+}}
+
+.be-time {{ font-size: 120px; font-weight: 500; font-variant-numeric: tabular-nums; }}
+.ampm {{ font-size: 50px; margin-left: 20px; color: rgba(255, 255, 255, 0.3); }}
+.be-date {{ font-size: 42px; font-weight: 450; color: #AAA; margin-right: 20px; }}
+.be-day {{ font-size: 42px; font-weight: 450; color: #BBB; }} 
+.small-time {{ font-size: 45px; font-variant-numeric: tabular-nums; }}
+.small-ampm {{ font-size: 30px; margin-left: 5px; color: rgba(255, 255, 255, 0.2); }}
+
+.market-status {{ font-size: 14px; font-weight: 600; margin-top: 10px; letter-spacing: 1px; }}
+.status-open {{ color: #00AA90 !important; }}
+.status-closed {{ color: #888 !important; }}
+
+/* 側邊欄展開狀態保護 */
+section[data-testid="stSidebar"] [data-testid="stHeader"] {{
+    display: none !important;
+}}
+section[data-testid="stSidebar"] {{
+    background-color: rgba(20, 20, 25, 0.95) !important;
+    backdrop-filter: blur(10px);
+}}
+</style>
 """, unsafe_allow_html=True)
 
 # --- 5. HTML 渲染 ---
 be_html = f'''
 <div class="be-zone">
     <div class="city-label">Belgium</div>
-    <div class="be-time">{now_be.strftime("%I:%M")}\
-        <span class="ampm">{now_be.strftime("%p")}</span></div>
+    <div class="be-time">{now_be.strftime("%I:%M")}<span class="ampm">{now_be.strftime("%p")}</span></div>
     <div class="info-line">
         <span class="be-date">{now_be.strftime("%B %d, %Y")}</span>
         <span class="be-day">{now_be.strftime("%A")}</span>
@@ -223,21 +233,16 @@ be_html = f'''
 
 tp_html = f'''
 <div class="tp-zone">
-    <div class="small-city-label">Taiwan\
-        <span class="diff-tag">{tp_diff}</span></div>
-    <div class="small-time">{now_tp.strftime("%I:%M")}\
-        <span class="small-ampm">{now_tp.strftime("%p")}</span></div>
+    <div class="small-city-label">Taiwan <span class="diff-tag">{tp_diff}</span></div>
+    <div class="small-time">{now_tp.strftime("%I:%M")}<span class="small-ampm">{now_tp.strftime("%p")}</span></div>
     <div class="market-status {tp_class}">{tp_stat}</div>
 </div>'''
 
 us_html = f'''
 <div class="us-zone">
-    <div class="small-city-label">New York\
-        <span class="diff-tag">{us_diff}</span></div>
-    <div class="small-time">{now_us.strftime("%I:%M")}\
-        <span class="small-ampm">{now_us.strftime("%p")}</span></div>
+    <div class="small-city-label">New York <span class="diff-tag">{us_diff}</span></div>
+    <div class="small-time">{now_us.strftime("%I:%M")}<span class="small-ampm">{now_us.strftime("%p")}</span></div>
     <div class="market-status {us_class}">{us_stat}</div>
 </div>'''
 
-st.markdown(f'<div class="dashboard-grid">{be_html}{tp_html}{us_html}</div>',\
-            unsafe_allow_html=True)
+st.markdown(f'<div class="dashboard-grid">{be_html}{tp_html}{us_html}</div>', unsafe_allow_html=True)
