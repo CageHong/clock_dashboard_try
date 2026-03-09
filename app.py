@@ -128,7 +128,7 @@ st.markdown(f"""
 
     /* 5. 文字與狀態顏色 */
     .city-label {{ font-size: 42px; color: #CCC; }}
-    .small-city-label {{ font-size: 20px; color: #AAA; }}
+    .small-city-label {{ font-size: 26px; color: #AAA; }}
     .be-time {{ font-size: 110px; font-weight: 500; }}
     .be-date {{ font-size: 42px; font-weight: 450; color: #AAA; margin-right: 20px; }}
     .be-day {{ font-size: 42px; font-weight: 450; color: #BBB; }} 
@@ -147,7 +147,7 @@ be_html = f'''
     <div class="be-time">{now_be.strftime("%H:%M:%S")}</div>
     <div class="info-line">
         <span class="be-date">{now_be.strftime("%Y-%m-%d")}</span>
-        <span class="be-day">{now_be.strftime("%A")[:3]}</span>
+        <span class="be-day">{now_be.strftime("%A")}</span>
     </div>
 </div>'''
 
