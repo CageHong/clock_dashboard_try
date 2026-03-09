@@ -147,7 +147,7 @@ be_html = f'''
     <div class="city-label">Belgium</div>
     <div class="be-time">{be_time_main}<span class="ampm">{be_ampm}</span></div>
     <div class="info-line">
-        <span class="be-date">{now_be.strftime("%b %d, %Y")}</span>
+        <span class="be-date">{now_be.strftime("%Y %B %d")}</span>
         <span class="be-day">{now_be.strftime("%A")}</span>
     </div>
 </div>'''
