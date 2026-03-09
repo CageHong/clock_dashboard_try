@@ -115,10 +115,18 @@ else:
 tp_stat, tp_class = check_market_status('XTAI')
 us_stat, us_class = check_market_status('NYSE')
 
-# --- 4. CSS 樣式注入 (回歸原始 Grid 比例 + 負邊距置頂) ---
+# --- 4. CSS 樣式注入 (Helvetica Neue + 置頂 + 淨化版) ---
 st.markdown(f"""
     <style>
-    /* 1. 透明化 Header 並隱藏干擾按鈕 */
+    /* 1. 全域字體設定：優先調用 Helvetica Neue 並優化渲染 */
+    html, body, [class*="css"], .stApp, div, span, p {{
+        font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", 
+                     "Microsoft JhengHei", sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }}
+
+    /* 2. 透明化 Header 並隱藏 Deploy 與 三個點選單 */
     header[data-testid="stHeader"] {{
         background: transparent !important;
     }}
@@ -126,18 +134,21 @@ st.markdown(f"""
         display: none !important;
     }}
     
-    /* 2. 側邊欄喚回按鈕美化 */
+    /* 3. 側邊欄喚回按鈕美化：隱身模式 */
     [data-testid="stSidebarCollapsedControl"] {{
         color: white !important;
         background: rgba(255, 255, 255, 0.1) !important;
         border-radius: 50%;
-        margin-top: 65px; /* 避開內容上移區域 */
+        margin-top: 65px; 
         opacity: 0.3;
-        transition: 0.4s;
+        transition: 0.4s ease;
     }}
-    [data-testid="stSidebarCollapsedControl"]:hover {{ opacity: 1; }}
+    [data-testid="stSidebarCollapsedControl"]:hover {{ 
+        opacity: 1; 
+        background: rgba(255, 255, 255, 0.2) !important;
+    }}
 
-    /* 3. 核心置頂佈局 (向上平移 60px) */
+    /* 4. 核心置頂佈局 (向上平移 60px 蓋住原 Header 區域) */
     .block-container {{
         padding: 0rem !important;
         margin-top: -60px !important; 
@@ -152,7 +163,7 @@ st.markdown(f"""
         transition: background 1.5s ease-in-out;
     }}
 
-    /* 4. 回歸原始 Grid 比例：25vw */
+    /* 5. Grid 佈局：回歸你最喜歡的 25vw 比例 */
     .dashboard-grid {{
         display: grid;
         grid-template-columns: repeat(6, 25vw);
@@ -178,34 +189,66 @@ st.markdown(f"""
     .tp-zone {{ grid-column: 1/2; grid-row: 3/4; }}
     .us-zone {{ grid-column: 2/3; grid-row: 3/4; }}
 
-    .city-label {{font-size: 50px; color: #DDD}}
-    /* 文字樣式完全復刻原版 */
+    /* 6. 文字細節：Helvetica Neue 的字距微調 */
+    .city-label {{ 
+        font-size: 50px; 
+        color: #DDD; 
+        letter-spacing: -1px; 
+    }}
     .small-city-label {{
         font-size: 26px;
         color: #AAA;
         display: flex;
-        align-items: baseline; /* 讓時差對齊城市名的底部 */
+        align-items: baseline;
+        letter-spacing: 0.5px;
     }}
 
-    /* 2. 時差文字：純文字、半透明、無背景 */
     .diff-tag {{
         font-size: 15px;
         font-weight: 400;
-        color: rgba(255, 255, 255, 0.4); /* 非常淡的文字顏色 */
-        margin-left: 12px; /* 與城市名的間距 */
+        color: rgba(255, 255, 255, 0.4);
+        margin-left: 12px;
         letter-spacing: 1px;
     }}
-    .be-time {{ font-size: 120px; font-weight: 500; font-variant-numeric: tabular-nums; }}
-    .ampm {{ font-size: 50px; margin-left: 20px; color: rgba(255, 255, 255, 0.3); }}
+
+    .be-time {{ 
+        font-size: 120px; 
+        font-weight: 500; 
+        font-variant-numeric: tabular-nums; 
+        letter-spacing: -2px; 
+    }}
+    .ampm {{ 
+        font-size: 50px; 
+        margin-left: 20px; 
+        color: rgba(255, 255, 255, 0.3); 
+    }}
     .be-date {{ font-size: 42px; font-weight: 450; color: #AAA; margin-right: 20px; }}
     .be-day {{ font-size: 42px; font-weight: 450; color: #BBB; }} 
-    .small-time {{ font-size: 45px; font-variant-numeric: tabular-nums; }}
-    .small-ampm {{ font-size: 30px; margin-left: 5px; color: rgba(255, 255, 255, 0.5); }}
+    
+    .small-time {{ 
+        font-size: 45px; 
+        font-variant-numeric: tabular-nums; 
+        letter-spacing: -1px; 
+    }}
+    .small-ampm {{ 
+        font-size: 30px; 
+        margin-left: 5px; 
+        color: rgba(255, 255, 255, 0.5); 
+    }}
 
-    .market-status {{ font-size: 14px; font-weight: 600; margin-top: 10px;\
-        letter-spacing: 1px; }}
+    .market-status {{ 
+        font-size: 14px; 
+        font-weight: 600; 
+        margin-top: 10px;
+        letter-spacing: 1.5px; 
+        text-transform: uppercase;
+    }}
     .status-open {{ color: #00AA90 !important; }}
     .status-closed {{ color: #888 !important; }}
+
+    /* 7. 側邊欄組件美化 */
+    div[data-baseweb="toggle"] > div {{ background-color: rgba(255,255,255,0.1) !important; }}
+    div[data-baseweb="toggle"][aria-checked="true"] > div {{ background-color: #AAA !important; }}
     </style>
 """, unsafe_allow_html=True)
 
